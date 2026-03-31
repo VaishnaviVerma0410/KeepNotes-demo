@@ -9,7 +9,7 @@ public class Notes {
 
     public Notes (String userName, List<Note> notes) {
         this.userName = userName;
-        this.notes = notes;
+        this.notes = notes; 
     }
 
     public String getUserName() {

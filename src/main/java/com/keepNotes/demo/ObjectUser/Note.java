@@ -6,6 +6,7 @@ public class Note {
     String body;
     int priority; //lesser the number, higher the priority
     int id;
+    private boolean isPinned = false;
 
     public Note() {
     }
@@ -46,5 +47,13 @@ public class Note {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public boolean getPinned() {
+        return isPinned;
+    }
+
+    public void setPinned(boolean pinned) {
+        isPinned = pinned;
     }
 }
