@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.management.RuntimeErrorException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,7 +27,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 
-
 // @PathVariable: Information you give in the URL. Used when the value is the path of the URL itself
 // @RestController: Tells Spring that this class handles HTTP requests and returns data (not views). It is also a shortcut for two annotations combined (@Controller, @ResponseBody)
 // @RequestMapping: It defines the URL path. Ex: @RequestMapping("/notes"), every endpoint inside starts with /notes
@@ -37,7 +35,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 // @RequestHeader: data from headers. Used when you need infor from HTTP headers.
 // 2
 @RestController
-@RequestMapping("/")
+@RequestMapping("/users")
 public class controllerDemo {
 
     User keepNotesApplication;
@@ -45,7 +43,8 @@ public class controllerDemo {
 
     // helper function to set ID for notes
     private void reindexNotes(User user) {
-        if (user.getNotes() == null) return;
+        if (user.getNotes() == null)
+            return;
         for (int i = 0; i < user.getNotes().size(); i++) {
             user.getNotes().get(i).setId(i);
         }
@@ -62,7 +61,7 @@ public class controllerDemo {
     }
 
     // Adding a user
-    @PostMapping("/addUser") // writes to memory
+    @PostMapping("addUser") // writes to memory
     public User addUser(@RequestBody User user) {
         if (user.getUserEmail() == null || user.getUserEmail().isEmpty()) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "userEmail is required");
@@ -77,8 +76,13 @@ public class controllerDemo {
     }
 
     // Get user
-    @GetMapping("/getUser") // reads from memory
+    @GetMapping("/{id}") // reads from memory
     public User getUser(@RequestParam String userEmail) {
+
+        if (userEmail == null || userEmail.trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "userEmail is required and cannot be empty");
+        }
+
         User user = users.get(userEmail);
         if (user == null)
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
@@ -101,12 +105,20 @@ public class controllerDemo {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
 
-        if (user.getNotes() == null) {
-            user.setNotes(new ArrayList<>());
+        if (note.getPriority() < 1) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Priority must be 1 or greater");
         }
 
-        if (note.getPriority() < 1) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Priority must start from 1");
+        if (note.getTitle() == null || note.getTitle().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Note title is required");
+        }
+
+        if (note.getBody() == null || note.getBody().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Note body is required");
+        }
+
+        if (user.getNotes() == null) {
+            user.setNotes(new ArrayList<>());
         }
 
         if (priorityExists(user, note.getPriority())) {
@@ -120,7 +132,7 @@ public class controllerDemo {
 
     // First learn how to remove user, then remove a note in the name of that user.
     // deleting a user
-    @DeleteMapping("users")
+    @DeleteMapping("/{id}")
     public ResponseEntity deleteUser(@RequestParam String userEmail) {
         User user = users.get(userEmail);
 
@@ -143,8 +155,9 @@ public class controllerDemo {
         }
 
         if (user.getNotes() == null || index < 0 || index >= user.getNotes().size()) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Bad user input");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid note index");
         }
+
         user.getNotes().remove(index);
         reindexNotes(user);
         return user;
@@ -156,7 +169,7 @@ public class controllerDemo {
         User user = users.get(userEmail);
 
         if (user == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND,"User not found");
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
         }
         user.getNotes().clear();
         return user;
@@ -188,7 +201,7 @@ public class controllerDemo {
     }
 
     // letting the user re-order the notes the way he see fits
-    @PutMapping("notes/reorder")   //this line is called a PUT request Mapping
+    @PutMapping("notes/reorder") // this line is called a PUT request Mapping
     public User reorderNotes(@RequestParam String userEmail, @RequestBody ReorderNoteRequest request) {
         User user = users.get(userEmail); // get the desired user
         if (user == null) { // if user does not exist, display the message
@@ -198,7 +211,11 @@ public class controllerDemo {
         int fromIndex = request.getFromIndex(); // get from Index (previous index before changing)
         int toIndex = request.getToIndex(); // get to index (index where the user wants the note to be)
 
-        if (fromIndex < 0 || fromIndex >= notes.size() || toIndex < 0 || toIndex >= notes.size()) { // if user is giving unexceptable index values, display this message
+        if (fromIndex < 0 || fromIndex >= notes.size() || toIndex < 0 || toIndex >= notes.size()) { // if user is giving
+                                                                                                    // unexceptable
+                                                                                                    // index values,
+                                                                                                    // display this
+                                                                                                    // message
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid note Index");
         }
 
@@ -207,7 +224,37 @@ public class controllerDemo {
         reindexNotes(user);
         return user;
     }
+
+    private void validateNote(Note note) {
+        if (note.getTitle() == null || note.getTitle().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Note title is required");
+        }
+        if (note.getBody() == null || note.getBody().trim().isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Note body is required");
+        }
+        if (note.getPriority() < 1) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Priority must be 1 or greater");
+        } 
+    }
+
+    @PutMapping("/{email}/notes/{index}")
+    public User updateNote(@PathVariable String email, @PathVariable int index, @RequestBody Note updatedNote) {
+        User user = users.get(email);
+        System.out.println("Updating note for user: " + email + " at index: " + index);
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+
+        if (index < 0 || index >= user.getNotes().size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid note index");
+        }
+
+        Note existingNote = user.getNotes().get(index);
+        existingNote.setTitle(updatedNote.getTitle());
+        existingNote.setBody(updatedNote.getBody());
+        existingNote.setPriority(updatedNote.getPriority());
+        validateNote(existingNote);
+        reindexNotes(user);
+        return user;
+    }
 }
-
-
-

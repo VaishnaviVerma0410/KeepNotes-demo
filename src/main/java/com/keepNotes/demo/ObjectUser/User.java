@@ -19,7 +19,7 @@ public class User {
     public String getUserName() {
         return userName;
     }
-     public void setUserName() {
+     public void setUserName(String userName) {
         this.userName = userName;
      }
 
@@ -27,7 +27,7 @@ public class User {
         return userEmail;
      }
 
-     public void setUserEmail() {
+     public void setUserEmail(String userEmail) {
         this.userEmail =userEmail;
     }
 

@@ -104,6 +104,7 @@ Before ending each day, confirm:
 **Done When**
 - User create/get/delete routes follow one consistent style.
 
+- Standardizes user routes to RESTful style under `/users` for better consistency and clarity.
 ---
 
 ### Day 7: Standardize Note Routes

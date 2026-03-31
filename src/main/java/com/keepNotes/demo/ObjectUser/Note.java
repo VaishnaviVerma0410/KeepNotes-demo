@@ -28,7 +28,7 @@ public class Note {
         return body;
     }
 
-    public void setBody(){
+    public void setBody(String body){
         this.body = body;
     }
     
