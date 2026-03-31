@@ -21,6 +21,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -238,7 +239,7 @@ public class controllerDemo {
     }
 
     @PutMapping("/{email}/notes/{index}")
-    public User updateNote(@PathVariable String email, @PathVariable int index, @RequestBody Note updatedNote) {
+    public Note updateNote(@PathVariable String email, @PathVariable int index, @RequestBody Note updatedNote) {
         User user = users.get(email);
         System.out.println("Updating note for user: " + email + " at index: " + index);
         if (user == null) {
@@ -255,6 +256,35 @@ public class controllerDemo {
         existingNote.setPriority(updatedNote.getPriority());
         validateNote(existingNote);
         reindexNotes(user);
-        return user;
+        return existingNote;       //return just the note, not needed to return the entire user
+    }
+
+    private Note getValidatedNote(String email, int index) {
+        User user = users.get(email);
+
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+
+        if (index < 0 || index >= user.getNotes().size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Note index invalid");
+        }
+        return user.getNotes().get(index);
+    }
+
+    @PatchMapping("/{email}/notes/{index}/pin")
+    public Note pinNote(@PathVariable String email, @PathVariable int index) {
+
+        Note note = getValidatedNote(email, index);
+        note.setPinned(true);
+        return note;
+    }
+
+    @PatchMapping("/{email}/notes/{index}/unpin")
+    public Note unPinNote(@PathVariable String email, @PathVariable int index) {
+
+        Note note = getValidatedNote(email, index);
+        note.setPinned(false);
+        return note;
     }
 }
