@@ -15,6 +15,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDateTime;
 
 
 import org.springframework.http.HttpStatus;
@@ -71,6 +72,12 @@ public class controllerDemo {
         if (users.containsKey(user.getUserEmail())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already exists");
         }
+
+        LocalDateTime now = LocalDateTime.now();
+        for (Note note : user.getNotes()) {
+            note.setCreatedAt(now);
+            note.setUpdatedAt(now);
+        }
         users.put(user.getUserEmail(), user);
         reindexNotes(user);
         return user;
@@ -98,7 +105,7 @@ public class controllerDemo {
 
     // adding individual note to a particular user
     @PostMapping("/notes/addNote")
-    public User addNoteToUser(@RequestParam String userEmail, @RequestBody Note note) {
+    public Note addNoteToUser(@RequestParam String userEmail, @RequestBody Note note) {
         User user = users.get(userEmail);
         // show "user does not exist instead of "no body returned for response if GET
         // requested after deleting"
@@ -126,9 +133,14 @@ public class controllerDemo {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Priority already exists for this user");
         }
 
+        LocalDateTime now = LocalDateTime.now();
+        note.setCreatedAt(now);
+        note.setUpdatedAt(now);
+
         user.getNotes().add(note);
         reindexNotes(user);
-        return user;
+        System.out.println("CreatedAt: " + note.getCreatedAt());
+        return note;
     }
 
     // First learn how to remove user, then remove a note in the name of that user.
@@ -198,6 +210,7 @@ public class controllerDemo {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Priority already exists");
         }
         user.getNotes().get(index).setPriority(priority);
+        user.getNotes().get(index).setUpdatedAt(LocalDateTime.now());
         return user;
     }
 
@@ -212,16 +225,12 @@ public class controllerDemo {
         int fromIndex = request.getFromIndex(); // get from Index (previous index before changing)
         int toIndex = request.getToIndex(); // get to index (index where the user wants the note to be)
 
-        if (fromIndex < 0 || fromIndex >= notes.size() || toIndex < 0 || toIndex >= notes.size()) { // if user is giving
-                                                                                                    // unexceptable
-                                                                                                    // index values,
-                                                                                                    // display this
-                                                                                                    // message
+        if (fromIndex < 0 || fromIndex >= notes.size() || toIndex < 0 || toIndex >= notes.size()) { // if user is giving unexceptable index values, display this message
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid note Index");
         }
 
         Note noteToMove = notes.remove(fromIndex); // picking the note to move
-        notes.add(toIndex, noteToMove); // putting the note picked into the new position
+        notes.add(toIndex, noteToMove); // putting the note picked into the new position    
         reindexNotes(user);
         return user;
     }
@@ -255,6 +264,7 @@ public class controllerDemo {
         existingNote.setBody(updatedNote.getBody());
         existingNote.setPriority(updatedNote.getPriority());
         validateNote(existingNote);
+        existingNote.setUpdatedAt(LocalDateTime.now());
         reindexNotes(user);
         return existingNote;       //return just the note, not needed to return the entire user
     }
@@ -277,6 +287,7 @@ public class controllerDemo {
 
         Note note = getValidatedNote(email, index);
         note.setPinned(true);
+        note.setUpdatedAt(LocalDateTime.now());
         return note;
     }
 
@@ -285,6 +296,7 @@ public class controllerDemo {
 
         Note note = getValidatedNote(email, index);
         note.setPinned(false);
+        note.setUpdatedAt(LocalDateTime.now());
         return note;
     }
 }
