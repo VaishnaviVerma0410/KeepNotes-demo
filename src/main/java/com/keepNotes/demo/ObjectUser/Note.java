@@ -1,4 +1,8 @@
 package com.keepNotes.demo.ObjectUser;
+import java.time.LocalDateTime;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
 public class Note {
 
@@ -7,6 +11,11 @@ public class Note {
     int priority; //lesser the number, higher the priority
     int id;
     private boolean isPinned = false;
+    @JsonProperty(access = Access.READ_ONLY)
+    private LocalDateTime createdAt;
+
+    @JsonProperty(access = Access.READ_ONLY)
+    private LocalDateTime updatedAt;
 
     public Note() {
     }
@@ -17,6 +26,7 @@ public class Note {
         this.priority = priority;
     }
 
+   
     public String getTitle() {
         return title;
     }
@@ -49,11 +59,27 @@ public class Note {
         this.id = id;
     }
 
-    public boolean getPinned() {
+    public boolean isPinned() {
         return isPinned;
     }
 
     public void setPinned(boolean pinned) {
         isPinned = pinned;
+    }
+
+    public LocalDateTime getCreatedAt() {   //only getter for createdAt so it never gets updated again and again
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 }
