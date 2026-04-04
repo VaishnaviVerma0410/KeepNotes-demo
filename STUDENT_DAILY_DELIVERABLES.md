@@ -162,6 +162,7 @@ Before ending each day, confirm:
 **Done When**
 - Archived state can be toggled successfully.
 
+//add getter and setter in Note.java then add suitable endPoint in ControllerDemo.java. Maybe this is similar to pin/unpin strategy. I think we can use PatchMapping endpoint for this. 
 ---
 
 ### Day 12: Trash (Soft Delete)
