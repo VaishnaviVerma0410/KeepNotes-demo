@@ -162,8 +162,7 @@ Before ending each day, confirm:
 **Done When**
 - Archived state can be toggled successfully.
 
-//add getter and setter in Note.java then add suitable endPoint in ControllerDemo.java. Maybe this is similar to pin/unpin strategy. I think we can use PatchMapping endpoint for this. 
----
+//add getter and setter in Note.java then add suitable endPoint in ControllerDemo.java. Maybe this is similar to pin/unpin strategy. I think we can use PatchMapping endpoint for this. It was very similar to pin/unpin as expected. I first modified the getUser endpoint, then I added the patch endpoint for archive/unarchive. The only issue I notice  is that at a time, we can only archive one note, not multiple.
 
 ### Day 12: Trash (Soft Delete)
 **Scope (2h max)**
@@ -174,6 +173,7 @@ Before ending each day, confirm:
 **Done When**
 - Delete no longer removes notes permanently.
 
+//I'm going to add a boolean method in Note.java calling it isTrashed. I'll add getter and setter for this method.Then, in delete endpoint, right now the note is permanently deleted, I'll just set it to isTrashed = true. Then I'll add a patchMapping endPoint to store all the items which are isTrashed = true. 
 ---
 
 ### Day 13: Restore + Permanent Delete

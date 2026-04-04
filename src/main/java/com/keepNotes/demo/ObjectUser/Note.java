@@ -17,6 +17,7 @@ public class Note {
     @JsonProperty(access = Access.READ_ONLY)
     private LocalDateTime updatedAt;
     private boolean isArchived = false;
+    private boolean isTrashed = false;
 
     public Note() {
     }
@@ -90,5 +91,13 @@ public class Note {
     
     public void setArchived(boolean archived) {
         this.isArchived = archived;
+    }
+
+    public boolean isTrashed() {
+        return isTrashed;
+    }
+
+    public void setTrashed(boolean trashed) {
+        this.isTrashed = trashed;
     }
 }

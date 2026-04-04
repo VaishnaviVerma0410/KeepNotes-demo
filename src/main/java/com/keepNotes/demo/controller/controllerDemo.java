@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.time.LocalDateTime;
 
-
+import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -176,8 +176,11 @@ public class controllerDemo {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid note index");
         }
 
-        user.getNotes().remove(index);
-        reindexNotes(user);
+        //user.getNotes().remove(index); this line was directly removing the note permanently
+        Note note = user.getNotes().get(index);
+        note.setTrashed(true);
+        note.setUpdatedAt(LocalDateTime.now());
+        //reindexNotes(user);
         return user;
     }
 
@@ -321,5 +324,26 @@ public class controllerDemo {
         note.setArchived(false);
         note.setUpdatedAt(LocalDateTime.now());
         return note;
+    }
+
+
+
+    @PatchMapping("/{email}/notes/{index}/trashedNotes")
+    public Note trashedNotes(@PathVariable String email, @PathVariable int index) {
+        Note note = getValidatedNote(email, index);
+        note.setTrashed(false); //this is false since true would be to just delete the note and false restores it
+        note.setUpdatedAt(LocalDateTime.now());
+        return note;
+    }
+
+    @GetMapping("/{email}/notes/trashed")
+    public List<Note> getTrashedNotes(@PathVariable String email) {
+        User user = users.get(email);
+
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User does not exist");
+        }
+         
+        return user.getNotes().stream().filter(Note::isTrashed).toList();
     }
 }
