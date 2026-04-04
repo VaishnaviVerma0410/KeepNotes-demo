@@ -92,16 +92,21 @@ public class controllerDemo {
         }
 
         User user = users.get(userEmail);
-        if (user == null)
+        if (user == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        // user.getNotes().sort(Comparator.comparing(Note::getTitle)); // added
-        // comparator function to sort the titles in ascending order
-        // user.getNotes().sort(Comparator.comparing(Note::getBody)); //this line
-        // overrides the sorting of titles.
-        user.getNotes().sort(Comparator.comparingInt(Note::getPriority));
+        }   
+        
+        List<Note> activeNotes = new ArrayList<>();
+        for (Note note : user.getNotes()) {
+            if (!note.isArchived()) {
+                activeNotes.add(note);
+            }
+        }
+        activeNotes.sort(Comparator.comparingInt(Note::getPriority));
+        user.setNotes(activeNotes);
         reindexNotes(user);
         return users.get(userEmail);
-    }
+        }
 
     // adding individual note to a particular user
     @PostMapping("/notes/addNote")
@@ -296,6 +301,24 @@ public class controllerDemo {
 
         Note note = getValidatedNote(email, index);
         note.setPinned(false);
+        note.setUpdatedAt(LocalDateTime.now());
+        return note;
+    }
+
+    @PatchMapping("/{email}/notes/{index}/archive")
+    public Note archiveNotes(@PathVariable String email, @PathVariable int index) {
+
+        Note note = getValidatedNote(email, index);
+        note.setArchived(true);
+        note.setUpdatedAt(LocalDateTime.now());
+        return note;
+    }
+
+    @PatchMapping("/{email}/notes/{index}/unarchive")
+    public Note unArchiveNotes(@PathVariable String email, @PathVariable int index) {
+
+        Note note = getValidatedNote(email, index);
+        note.setArchived(false);
         note.setUpdatedAt(LocalDateTime.now());
         return note;
     }

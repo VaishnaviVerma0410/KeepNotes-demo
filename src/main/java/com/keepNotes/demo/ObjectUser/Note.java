@@ -16,6 +16,7 @@ public class Note {
 
     @JsonProperty(access = Access.READ_ONLY)
     private LocalDateTime updatedAt;
+    private boolean isArchived = false;
 
     public Note() {
     }
@@ -81,5 +82,13 @@ public class Note {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public boolean isArchived() {
+        return isArchived;
+    }
+    
+    public void setArchived(boolean archived) {
+        this.isArchived = archived;
     }
 }
