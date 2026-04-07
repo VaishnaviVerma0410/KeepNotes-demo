@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.cglib.core.Local;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -94,19 +95,30 @@ public class controllerDemo {
         User user = users.get(userEmail);
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
-        }   
-        
-        List<Note> activeNotes = new ArrayList<>();
-        for (Note note : user.getNotes()) {
-            if (!note.isArchived()) {
-                activeNotes.add(note);
-            }
         }
-        activeNotes.sort(Comparator.comparingInt(Note::getPriority));
-        user.setNotes(activeNotes);
-        reindexNotes(user);
-        return users.get(userEmail);
-        }
+
+        List<Note> filteredNotes = user.getNotes().stream()
+            .filter(note -> !note.isArchived() && !note.isTrashed())
+            .sorted(Comparator.comparingInt(Note::getPriority)).toList();
+
+        User responseUser = new User();
+        responseUser.setUserEmail(user.getUserEmail());
+        responseUser.setNotes(new ArrayList<>(filteredNotes));
+
+        reindexNotes(responseUser);
+        return responseUser;
+
+        // List<Note> activeNotes = new ArrayList<>();
+        // for (Note note : user.getNotes()) {
+        // if (!note.isArchived()) {
+        // activeNotes.add(note);
+        // }
+        // }
+        // activeNotes.sort(Comparator.comparingInt(Note::getPriority));
+        // user.setNotes(activeNotes);
+        // reindexNotes(user);
+        // return users.get(userEmail);
+    }
 
     // adding individual note to a particular user
     @PostMapping("/notes/addNote")
@@ -176,11 +188,12 @@ public class controllerDemo {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid note index");
         }
 
-        //user.getNotes().remove(index); this line was directly removing the note permanently
+        // user.getNotes().remove(index); this line was directly removing the note
+        // permanently
         Note note = user.getNotes().get(index);
         note.setTrashed(true);
         note.setUpdatedAt(LocalDateTime.now());
-        //reindexNotes(user);
+        // reindexNotes(user);
         return user;
     }
 
@@ -233,12 +246,16 @@ public class controllerDemo {
         int fromIndex = request.getFromIndex(); // get from Index (previous index before changing)
         int toIndex = request.getToIndex(); // get to index (index where the user wants the note to be)
 
-        if (fromIndex < 0 || fromIndex >= notes.size() || toIndex < 0 || toIndex >= notes.size()) { // if user is giving unexceptable index values, display this message
+        if (fromIndex < 0 || fromIndex >= notes.size() || toIndex < 0 || toIndex >= notes.size()) { // if user is giving
+                                                                                                    // unexceptable
+                                                                                                    // index values,
+                                                                                                    // display this
+                                                                                                    // message
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid note Index");
         }
 
         Note noteToMove = notes.remove(fromIndex); // picking the note to move
-        notes.add(toIndex, noteToMove); // putting the note picked into the new position    
+        notes.add(toIndex, noteToMove); // putting the note picked into the new position
         reindexNotes(user);
         return user;
     }
@@ -252,7 +269,7 @@ public class controllerDemo {
         }
         if (note.getPriority() < 1) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Priority must be 1 or greater");
-        } 
+        }
     }
 
     @PutMapping("/{email}/notes/{index}")
@@ -274,7 +291,7 @@ public class controllerDemo {
         validateNote(existingNote);
         existingNote.setUpdatedAt(LocalDateTime.now());
         reindexNotes(user);
-        return existingNote;       //return just the note, not needed to return the entire user
+        return existingNote; // return just the note, not needed to return the entire user
     }
 
     private Note getValidatedNote(String email, int index) {
@@ -326,12 +343,11 @@ public class controllerDemo {
         return note;
     }
 
-
-
     @PatchMapping("/{email}/notes/{index}/trashedNotes")
     public Note trashedNotes(@PathVariable String email, @PathVariable int index) {
         Note note = getValidatedNote(email, index);
-        note.setTrashed(false); //this is false since true would be to just delete the note and false restores it
+        note.setTrashed(false); // this is false since true would be to just delete the note and false restores
+                                // it
         note.setUpdatedAt(LocalDateTime.now());
         return note;
     }
@@ -343,7 +359,36 @@ public class controllerDemo {
         if (user == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User does not exist");
         }
-         
+
         return user.getNotes().stream().filter(Note::isTrashed).toList();
+    }
+
+    @DeleteMapping("/notes/permanentDelete/{index}")
+    public User permanentDeleteNote(@RequestParam String userEmail, @PathVariable int index) {
+        User user = users.get(userEmail);
+
+        // Give proper exception for delete Mapping
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User not found");
+        }
+
+        if (user.getNotes() == null || index < 0 || index >= user.getNotes().size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid note index");
+        }
+
+        Note note = user.getNotes().get(index);
+
+        if (note.isTrashed() == false) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
+                    "Note has to be trashed to be able to permanent delete");
+        }
+
+        user.getNotes().remove(index); // this line was directly removing the note permanently, I had removed this line
+                                       // before to not delete permanently, but adding it back now. So now I have two
+                                       // different endpoints for delete, 1 deletes but still stores in the system, 2nd
+                                       // deletes permanently.
+        // note.setTrashed(true);
+        reindexNotes(user);
+        return user;
     }
 }
