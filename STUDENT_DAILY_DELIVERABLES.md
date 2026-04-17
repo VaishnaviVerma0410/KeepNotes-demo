@@ -195,7 +195,7 @@ Before ending each day, confirm:
 
 **Done When**
 - Search returns only matching notes.
-//Today, I'll have to make an endpoint which will be of get method. I'll start of normally by checking if the userEmail given is right or not, if it has notes or is empty.
+//Today, I'll have to make an endpoint which will be of get method. I'll start of normally by checking if the userEmail given is right or not, if it has notes or is empty. Then, I'll check if the query parameter is present or not. If it's not present, then I'll return all the notes. If it's present, then I'll filter the notes by checking if the title or body contains the query string (case-insensitive). Finally, I'll return the filtered list of notes.
 
 
 
@@ -209,7 +209,7 @@ Before ending each day, confirm:
 
 **Done When**
 - Filtered/sorted lists work and are manually verified.
-
+//Today
 ---
 
 ## Week 4 — Tests, Errors, and Git Collaboration
