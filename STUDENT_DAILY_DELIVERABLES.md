@@ -184,7 +184,7 @@ Before ending each day, confirm:
 
 **Done When**
 - Trash lifecycle (trash → restore/hard-delete) works.
-
+//I already had an endpoint to restore the trashed notes. I added an endpoint to delete the trashed notes permanently.
 ---
 
 ### Day 14: Search Endpoint (Keyword)
@@ -195,6 +195,9 @@ Before ending each day, confirm:
 
 **Done When**
 - Search returns only matching notes.
+//Today, I'll have to make an endpoint which will be of get method. I'll start of normally by checking if the userEmail given is right or not, if it has notes or is empty.
+
+
 
 ---
 
