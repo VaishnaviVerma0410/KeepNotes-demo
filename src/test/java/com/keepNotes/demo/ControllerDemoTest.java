@@ -129,4 +129,59 @@ class ControllerDemoTest {
         .andExpect(jsonPath("$.priority").value(2))
         .andExpect(jsonPath("$.updatedAt").exists());
     }
+
+    @Test
+    void createUser_missingEmail_returns400() throws Exception {
+        Map<String, Object> user = new HashMap<>();
+        user.put("userName", "No Email User");  //intentionally removed userEmail
+        user.put("notes", java.util.Collections.emptyList());
+
+        mockMvc.perform(post("/users/addUser")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(user)))
+            .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void createUser_duplicate_returns400() throws Exception {
+        String email = "dup-" + UUID.randomUUID();
+
+        Map<String, Object> user = new HashMap<>();
+        user.put("userName", "First");
+        user.put("userEmail", email);
+        user.put("notes", java.util.Collections.emptyList());
+
+        // first time — should succeed
+        mockMvc.perform(post("/users/addUser")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(user))
+            ).andExpect(status().isOk());
+
+    // second time — same email, should fail
+        mockMvc.perform(post("/users/addUser")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(user))
+        ).andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void getUser_notFound_returns404() throws Exception {
+        mockMvc.perform(
+            get("/users/1").param("userEmail", "nonexistent-" + UUID.randomUUID())
+        ).andExpect(status().isNotFound());
+    }
+
+    @Test
+    void addNote_userNotFound_returns404() throws Exception {
+        Map<String, Object> note = new HashMap<>();
+        note.put("title", "Orphan note");
+        note.put("body", "No user");
+        note.put("priority", 1);
+
+        mockMvc.perform(post("/users/notes/addNote")
+            .param("userEmail", "ghost-" + UUID.randomUUID())
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(note))
+        ).andExpect(status().isNotFound());
+    }
 }
