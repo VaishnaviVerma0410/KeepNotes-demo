@@ -209,7 +209,7 @@ Before ending each day, confirm:
 
 **Done When**
 - Filtered/sorted lists work and are manually verified.
-//Today
+//While testing in insomnia, the link should have email of the user but not @gmail.com, instead %gmail.com.
 ---
 
 ## Week 4 — Tests, Errors, and Git Collaboration
@@ -222,7 +222,7 @@ Before ending each day, confirm:
 
 **Done When**
 - Happy-path tests pass reliably.
-
+//I first thought of just testing in insomnia by creating new user and then creating a note for that user and then updating that note. But, chatgpt told me that I should add automated tests for this. It told me to create a test file
 ---
 
 ### Day 17: Failure-Path Tests
@@ -234,6 +234,7 @@ Before ending each day, confirm:
 **Done When**
 - At least 4 failure scenarios are covered.
 
+// today
 ---
 
 ### Day 18: Global Error Response Format
