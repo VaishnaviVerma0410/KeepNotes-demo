@@ -387,5 +387,3 @@ Before ending each day, confirm:
 
 **Done When**
 - Project is portfolio-ready and demonstrates backend + DB + UI flow.
-
-
