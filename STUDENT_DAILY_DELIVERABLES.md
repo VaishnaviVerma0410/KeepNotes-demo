@@ -245,7 +245,7 @@ Before ending each day, confirm:
 
 **Done When**
 - Errors are consistent across endpoints.
-
+//
 ---
 
 ### Day 19: API Docs (Minimal)

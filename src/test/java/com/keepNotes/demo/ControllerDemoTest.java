@@ -172,16 +172,32 @@ class ControllerDemoTest {
     }
 
     @Test
-    void addNote_userNotFound_returns404() throws Exception {
-        Map<String, Object> note = new HashMap<>();
-        note.put("title", "Orphan note");
-        note.put("body", "No user");
-        note.put("priority", 1);
+    void addNote_userNotFound_returns404() throws Exception { //if someone tries to add a note, give 404 not found
+        Map<String, Object> note = new HashMap<>(); // making a hshmap
+        note.put("title", "Orphan note");  //title of the note
+        note.put("body", "No user"); //body of the note
+        note.put("priority", 1); //priority of the note
 
-        mockMvc.perform(post("/users/notes/addNote")
-            .param("userEmail", "ghost-" + UUID.randomUUID())
-            .contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post("/users/notes/addNote") //running addNote for this user
+            .param("userEmail", "ghost-" + UUID.randomUUID()) //saying this user does not exist
+            .contentType(MediaType.APPLICATION_JSON) 
             .content(objectMapper.writeValueAsString(note))
-        ).andExpect(status().isNotFound());
+        ).andExpect(status().isNotFound()); //expeted result is 404 not found
+    }
+
+    @Test
+    void createUser_missingEmail_returnsStandardErrorShape() throws Exceptio${payload.AutoConfigureMockMvc} command
+        Map<String, Object> user = new HashMap<>();
+        user.put("userName", "No Email user");
+        user.put("notes", java.util.Collections.emptyList());
+
+        mockMvc.perform(post("/users/addUser")
+            .contentType(MediaType.APPLICATION_JSON)org
+            .content(objectMapper.writeValueAsString(user)))
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.status").value(400))
+            .andExpect(jsonPath("$.message").value("userEmail is required"))
+            .andExpect(jsonPath("$.path").value("/users/addUser"))
+            .andExpect(jsonPath("$.timestamp").exists());
     }
 }
