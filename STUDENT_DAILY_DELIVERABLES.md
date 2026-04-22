@@ -162,7 +162,7 @@ Before ending each day, confirm:
 **Done When**
 - Archived state can be toggled successfully.
 
----
+//add getter and setter in Note.java then add suitable endPoint in ControllerDemo.java. Maybe this is similar to pin/unpin strategy. I think we can use PatchMapping endpoint for this. It was very similar to pin/unpin as expected. I first modified the getUser endpoint, then I added the patch endpoint for archive/unarchive. The only issue I notice  is that at a time, we can only archive one note, not multiple.
 
 ### Day 12: Trash (Soft Delete)
 **Scope (2h max)**
@@ -173,6 +173,7 @@ Before ending each day, confirm:
 **Done When**
 - Delete no longer removes notes permanently.
 
+//I'm going to add a boolean method in Note.java calling it isTrashed. I'll add getter and setter for this method.Then, in delete endpoint, right now the note is permanently deleted, I'll just set it to isTrashed = true. Then I'll add a patchMapping endPoint to store all the items which are isTrashed = true. 
 ---
 
 ### Day 13: Restore + Permanent Delete
@@ -183,7 +184,7 @@ Before ending each day, confirm:
 
 **Done When**
 - Trash lifecycle (trash → restore/hard-delete) works.
-
+//I already had an endpoint to restore the trashed notes. I added an endpoint to delete the trashed notes permanently.
 ---
 
 ### Day 14: Search Endpoint (Keyword)
@@ -194,6 +195,9 @@ Before ending each day, confirm:
 
 **Done When**
 - Search returns only matching notes.
+//Today, I'll have to make an endpoint which will be of get method. I'll start of normally by checking if the userEmail given is right or not, if it has notes or is empty. Then, I'll check if the query parameter is present or not. If it's not present, then I'll return all the notes. If it's present, then I'll filter the notes by checking if the title or body contains the query string (case-insensitive). Finally, I'll return the filtered list of notes.
+
+
 
 ---
 
@@ -205,7 +209,7 @@ Before ending each day, confirm:
 
 **Done When**
 - Filtered/sorted lists work and are manually verified.
-
+//While testing in insomnia, the link should have email of the user but not @gmail.com, instead %gmail.com.
 ---
 
 ## Week 4 — Tests, Errors, and Git Collaboration
@@ -218,7 +222,7 @@ Before ending each day, confirm:
 
 **Done When**
 - Happy-path tests pass reliably.
-
+//I first thought of just testing in insomnia by creating new user and then creating a note for that user and then updating that note. But, chatgpt told me that I should add automated tests for this. It told me to create a test file
 ---
 
 ### Day 17: Failure-Path Tests
@@ -230,6 +234,7 @@ Before ending each day, confirm:
 **Done When**
 - At least 4 failure scenarios are covered.
 
+// today
 ---
 
 ### Day 18: Global Error Response Format
@@ -240,7 +245,7 @@ Before ending each day, confirm:
 
 **Done When**
 - Errors are consistent across endpoints.
-
+//
 ---
 
 ### Day 19: API Docs (Minimal)
@@ -382,5 +387,3 @@ Before ending each day, confirm:
 
 **Done When**
 - Project is portfolio-ready and demonstrates backend + DB + UI flow.
-
-

@@ -15,12 +15,13 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.time.LocalDateTime;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -70,6 +71,13 @@ public class controllerDemo {
         if (users.containsKey(user.getUserEmail())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "User already exists");
         }
+
+        LocalDateTime now = LocalDateTime.now(); // was getting null for date and time until figured out that it should
+                                                 // be added while creating the user.
+        for (Note note : user.getNotes()) { // Did think of it but didn't stress enough!!
+            note.setCreatedAt(now);
+            note.setUpdatedAt(now);
+        }
         users.put(user.getUserEmail(), user);
         reindexNotes(user);
         return user;
@@ -97,7 +105,7 @@ public class controllerDemo {
 
     // adding individual note to a particular user
     @PostMapping("/notes/addNote")
-    public User addNoteToUser(@RequestParam String userEmail, @RequestBody Note note) {
+    public Note addNoteToUser(@RequestParam String userEmail, @RequestBody Note note) {
         User user = users.get(userEmail);
         // show "user does not exist instead of "no body returned for response if GET
         // requested after deleting"
@@ -125,9 +133,14 @@ public class controllerDemo {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Priority already exists for this user");
         }
 
+        LocalDateTime now = LocalDateTime.now();
+        note.setCreatedAt(now);
+        note.setUpdatedAt(now);
+
         user.getNotes().add(note);
         reindexNotes(user);
-        return user;
+        System.out.println("CreatedAt: " + note.getCreatedAt());
+        return note;
     }
 
     // First learn how to remove user, then remove a note in the name of that user.
@@ -197,6 +210,7 @@ public class controllerDemo {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Priority already exists");
         }
         user.getNotes().get(index).setPriority(priority);
+        user.getNotes().get(index).setUpdatedAt(LocalDateTime.now());
         return user;
     }
 
@@ -234,11 +248,11 @@ public class controllerDemo {
         }
         if (note.getPriority() < 1) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Priority must be 1 or greater");
-        } 
+        }
     }
 
     @PutMapping("/{email}/notes/{index}")
-    public User updateNote(@PathVariable String email, @PathVariable int index, @RequestBody Note updatedNote) {
+    public Note updateNote(@PathVariable String email, @PathVariable int index, @RequestBody Note updatedNote) {
         User user = users.get(email);
         System.out.println("Updating note for user: " + email + " at index: " + index);
         if (user == null) {
@@ -254,7 +268,97 @@ public class controllerDemo {
         existingNote.setBody(updatedNote.getBody());
         existingNote.setPriority(updatedNote.getPriority());
         validateNote(existingNote);
+        existingNote.setUpdatedAt(LocalDateTime.now());
         reindexNotes(user);
-        return user;
+        return existingNote; // return just the note, not needed to return the entire user
+    }
+
+    private Note getValidatedNote(String email, int index) {
+        User user = users.get(email);
+
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+
+        if (index < 0 || index >= user.getNotes().size()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Note index invalid");
+        }
+        return user.getNotes().get(index);
+    }
+
+    @PatchMapping("/{email}/notes/{index}/pin")
+    public Note pinNote(@PathVariable String email, @PathVariable int index) {
+
+        Note note = getValidatedNote(email, index);
+        note.setPinned(true);
+        note.setUpdatedAt(LocalDateTime.now());
+        return note;
+    }
+
+    @PatchMapping("/{email}/notes/{index}/unpin")
+    public Note unPinNote(@PathVariable String email, @PathVariable int index) {
+
+        Note note = getValidatedNote(email, index);
+        note.setPinned(false);
+        note.setUpdatedAt(LocalDateTime.now());
+        return note;
+    }
+
+    @GetMapping("/notes/search")
+    public List<Note> searchNotes(@RequestParam String userEmail, @RequestParam String q) {
+        User user = users.get(userEmail);
+
+        if (user == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+
+        if (user.getNotes() == null) {
+            return new ArrayList<>();
+        }
+
+        String search = q.toLowerCase();
+        List<Note> result = new ArrayList<>();
+
+        for (Note note : user.getNotes()) {
+            if (note.getTitle().toLowerCase().contains(search) || note.getBody().toLowerCase().contains(search)) {
+                result.add(note);
+            }
+        }
+        return result;
+    }
+
+    @GetMapping("/notes")
+    public List<Note> filteredNotes(@RequestParam String userEmail, @RequestParam(required = false) Boolean pinned,
+            @RequestParam(required = false) Boolean archived, @RequestParam(required = false) Boolean trashed, //Boolean, not boolean so they can be null when not prvided
+            @RequestParam(required = false) String sort) {
+        User user = users.get(userEmail); //getting the user using his email
+
+        if (user == null) { //if user does not exist, return "User not found"
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found");
+        }
+
+        List<Note> notes = user.getNotes();  //Getting the notes of the user
+
+        if (notes == null) { 
+            return new ArrayList<>();  //if no notes exist, return empty ArrayList
+        }
+        List<Note> filteredNotes = new ArrayList<>();  //creating a new ArrayList to start adding after filtering
+
+        for (Note note : notes) { 
+            if (pinned != null && note.isPinned() != pinned) {  //If the caller provided pinned=true (or false), skip notes that don't match. If pinned is null (not provided), this check is skipped entirely — so all notes pass through.
+                continue;
+            }
+            if (archived != null && note.isArchived() != archived) {
+                continue;
+            }
+            if (trashed != null && note.isTrashed() != trashed) {
+                continue;
+            }
+            filteredNotes.add(note); 
+        }
+        if ("updatedAt".equals(sort)) {
+            filteredNotes.sort((a, b) -> b.getUpdatedAt().compareTo(a.getUpdatedAt())); //here it will sort in descending order because b compared to a, if vice versa, then result would be ascending
+        }
+        return filteredNotes; //return result
     }
 }
