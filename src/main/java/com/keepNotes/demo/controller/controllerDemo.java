@@ -47,7 +47,7 @@ public class controllerDemo {
         if (user.getNotes() == null)
             return;
         for (int i = 0; i < user.getNotes().size(); i++) {
-            user.getNotes().get(i).setId(i);
+            user.getNotes().get(i).setId((long) i);
         }
     }
 
