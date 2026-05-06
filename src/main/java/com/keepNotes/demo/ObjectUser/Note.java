@@ -1,21 +1,61 @@
+// package com.keepNotes.demo.ObjectUser;
+// import java.time.LocalDateTime;
+
+// import com.fasterxml.jackson.annotation.JsonProperty;
+// import com.fasterxml.jackson.annotation.JsonProperty.Access;
+
+// public class Note {
+
+//     String title;
+//     String body;
+//     int priority; //lesser the number, higher the priority
+//     int id;
+//     private boolean isPinned = false;
+//     @JsonProperty(access = Access.READ_ONLY)
+//     private LocalDateTime createdAt;
+
+//     @JsonProperty(access = Access.READ_ONLY)
+//     private LocalDateTime updatedAt;
+//     private boolean isArchived = false;
+//     private boolean isTrashed = false;
+
+//     public Note() {
+//     }
+
+//     public Note(String title, String body, int priority) {
+//         this.title = title;
+//         this.body = body;
+//         this.priority = priority;
+//     }
+
 package com.keepNotes.demo.ObjectUser;
+
 import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
+import jakarta.persistence.*;
+
+@Entity   //tells spring that this class should be stored as a table in the database
 public class Note {
 
-    String title;
-    String body;
-    int priority; //lesser the number, higher the priority
-    int id;
+    @Id   //marks primary key (unique identifier)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;   // changed from int → Long (important)
+
+    private String title;
+    private String body;
+    private int priority;
+
     private boolean isPinned = false;
+
     @JsonProperty(access = Access.READ_ONLY)
     private LocalDateTime createdAt;
 
     @JsonProperty(access = Access.READ_ONLY)
     private LocalDateTime updatedAt;
+
     private boolean isArchived = false;
     private boolean isTrashed = false;
 
@@ -27,6 +67,7 @@ public class Note {
         this.body = body;
         this.priority = priority;
     }
+
 
    
     public String getTitle() {
@@ -53,11 +94,11 @@ public class Note {
         this.priority = priority;
     }
 
-    public int getId() {
+    public Long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

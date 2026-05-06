@@ -186,13 +186,13 @@ class ControllerDemoTest {
     }
 
     @Test
-    void createUser_missingEmail_returnsStandardErrorShape() throws Exceptio${payload.AutoConfigureMockMvc} command
+    void createUser_missingEmail_returnsStandardErrorShape() throws Exception {
         Map<String, Object> user = new HashMap<>();
         user.put("userName", "No Email user");
         user.put("notes", java.util.Collections.emptyList());
 
         mockMvc.perform(post("/users/addUser")
-            .contentType(MediaType.APPLICATION_JSON)org
+            .contentType(MediaType.APPLICATION_JSON)
             .content(objectMapper.writeValueAsString(user)))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.status").value(400))
