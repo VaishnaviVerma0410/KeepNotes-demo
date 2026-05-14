@@ -1,10 +1,10 @@
 package com.keepNotes.demo.ObjectUser;
 
 public class ReorderNoteRequest {
-    int fromIndex;
-    int toIndex;
+    private int fromIndex;
+    private int toIndex;
 
-    public int getFromIndex(){
+    public int getFromIndex() {
         return fromIndex;
     }
 
@@ -12,7 +12,7 @@ public class ReorderNoteRequest {
         this.fromIndex = fromIndex;
     }
 
-    public int getToIndex(){
+    public int getToIndex() {
         return toIndex;
     }
 

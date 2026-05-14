@@ -28,6 +28,8 @@
 //         this.priority = priority;
 //     }
 
+
+// with the updated code, , now this file is not just a normal java object but a real database table
 package com.keepNotes.demo.ObjectUser;
 
 import java.time.LocalDateTime;
@@ -38,7 +40,7 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import jakarta.persistence.*;
 
 @Entity   //tells spring that this class should be stored as a table in the database
-public class Note {
+public class Note {    //class note became "Hey database, make a table called NOTE"
 
     @Id   //marks primary key (unique identifier)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -67,8 +69,6 @@ public class Note {
         this.body = body;
         this.priority = priority;
     }
-
-
    
     public String getTitle() {
         return title;

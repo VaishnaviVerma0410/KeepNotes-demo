@@ -2,34 +2,50 @@
 ./mvnw spring-boot:run
 
 ## Base URL
-<!-- http://localhost:8080 -->
+http://localhost:8080/users
 
-POST /users/addUser
-
-Request: {
-  "userEmail": "john@example.com",
-  "notes": []
-}
-Response:
+POST /users
 {
   "email": "test@example.com",
   "name": "John Doe"
 }
-GET /users/{id} 
-JSON Response:
-{
-  "id": 1,
-  "email": "name@example.com"}
 
-  POST /users/notes/addNote?userEmail=name@example.com
-  Request: 
-  {
+{
+  "id": 0,
+  "title": "Sample Note",
+  "body": "This is a note",
+  "priority": 1,
+  "pinned": false,
+  "archived": false,
+  "trashed": false,
+  "createdAt": "2026-04-21T12:00:00",
+  "updatedAt": "2026-04-21T12:00:00"
+}
+
+
+POST /addUser
+{
+  "userEmail": "name@example.com",
+  "notes": []
+}
+{
+  "userEmail": "name@example.com",
+  "notes": []
+}
+
+GET /1?userEmail=name@example.com
+{
+  "userEmail": "name@example.com",
+  "notes": []
+}
+
+POST /users/notes/addNote?userEmail=name@example.com
+{
   "title": "Buy milk",
   "body": "From store",
   "priority": 1
 }
-Response: 
-{
+ Expected Response: {
   "id": 0,
   "title": "Buy milk",
   "body": "From store",
@@ -39,36 +55,29 @@ Response:
   "updatedAt": "..."
 }
 
+DELETE /notes?userEmail=name@example.com
+Response: Notes deleted Successfully
 
-DELETE /users/{id}?userEmail=name@example.com
-Reponse: User deleted successfully
+DELETE /{id}?userEmail=name@example.com
+Response: User deleted Successfully
 
-DELETE /users/notes/delete/{index}?userEmail=name@example.com
-Response: Note deleted successfully
 
-DELETE /users/notes?userEmail=name@example.com
-Response: {
-  "notes": []
-}
-
-PUT /users/notes/updatePriority/{index}?userEmail=name@example.com&priority=2
-
-PUT /users/notes/reorder?userEmail=name@example.com
-Request:
+PUT /notes/updatePriority/0?userEmail=name@example.com&priority=2
 {
   "fromIndex": 0,
   "toIndex": 2
 }
 
-PUT /users/{email}/notes/{index}
-Request:
+PUT  /{email}/notes/{index}
 {
   "title": "Updated",
   "body": "Updated body",
   "priority": 2
 }
 
-PATCH /users/{email}/notes/{index}/pin //same for unpin, archive, unarchive, trashed and restore notes
+PATCH /{email}/notes/{index}/pin  //same for unpin, archive, unarchive, trash, restore
 
-GET /users/notes/search?userEmail=name@example.com&q=milk
-Response: List of matching notes
+GET /notes/search?userEmail=john@example.com&q=milk
+
+To vacate the port 8081, use the following command in PowerShell: Get-NetTCPConnection -LocalPort 8081 | Select-Object LocalAddress,LocalPort,State,OwningProcess
+Then stop the process using the OwningProcess PID: Stop-Process -Id 31624 -Force

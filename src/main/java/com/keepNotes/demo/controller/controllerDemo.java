@@ -1,3 +1,5 @@
+//./mvnw spring-boot:run to run the program
+
 package com.keepNotes.demo.controller;
 
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -7,8 +9,6 @@ import org.springframework.web.server.ResponseStatusException;
 import com.keepNotes.demo.ObjectUser.Note;
 import com.keepNotes.demo.ObjectUser.ReorderNoteRequest;
 import com.keepNotes.demo.ObjectUser.User;
-
-import jakarta.websocket.server.PathParam;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -39,7 +39,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 @RequestMapping("/users")
 public class controllerDemo {
 
-    User keepNotesApplication;
     private HashMap<String, User> users = new HashMap<>();
 
     // helper function to set ID for notes
@@ -146,7 +145,7 @@ public class controllerDemo {
     // First learn how to remove user, then remove a note in the name of that user.
     // deleting a user
     @DeleteMapping("/{id}")
-    public ResponseEntity deleteUser(@RequestParam String userEmail) {
+    public ResponseEntity<String> deleteUser(@RequestParam String userEmail) {
         User user = users.get(userEmail);
 
         if (user == null) {
