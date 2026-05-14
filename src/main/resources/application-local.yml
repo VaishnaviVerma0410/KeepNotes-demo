@@ -10,9 +10,6 @@ spring:
     driver-class-name: org.h2.Driver
     username: sa
     password:
-
-  jpa:
-    hibernate:
       ddl-auto: update    #AUTOMATICALLY CREATES/UPDATES TABLES FROM @eNTITY CLASES. iT SAVES ME FROM WRITING sql MANUALLY
     show-sql: true      #PRINTS sql QUERIES IN CONSOLE. iT HELPS WITH DEBUGGING
     properties:
