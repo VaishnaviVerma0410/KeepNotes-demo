@@ -306,6 +306,8 @@ Before ending each day, confirm:
 **Done When**
 - User-note relationship persists correctly.
 
+We taught the app that notes are not floating around alone anymore.
+Every note now has an owner.
 ---
 
 ### Day 24: Move One API Flow to DB
