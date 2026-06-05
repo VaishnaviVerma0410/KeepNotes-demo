@@ -1,10 +1,17 @@
 package com.keepNotes.demo.entity;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.keepNotes.demo.ObjectUser.Note;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 
 @Entity
 public class UserEntity {
@@ -25,6 +32,9 @@ public class UserEntity {
         this.userName = userName;
         this.userEmail = userEmail;
     }
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)  //one user can have many notes
+    private List<Note> notes = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -49,4 +59,12 @@ public class UserEntity {
     public void setUserEmail(String userEmail) {
         this.userEmail = userEmail;
     }
+
+    public List<Note> getNotes() {
+    return notes;
+}
+
+public void setNotes(List<Note> notes) {
+    this.notes = notes;
+}
 }

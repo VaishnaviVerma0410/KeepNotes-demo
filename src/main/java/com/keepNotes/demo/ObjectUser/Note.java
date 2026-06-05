@@ -36,6 +36,7 @@ import java.time.LocalDateTime;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
+import com.keepNotes.demo.entity.UserEntity;
 
 import jakarta.persistence.*;
 
@@ -61,6 +62,10 @@ public class Note {    //class note became "Hey database, make a table called NO
     private boolean isArchived = false;
     private boolean isTrashed = false;
 
+        @ManyToOne  //many notes can point to one user
+@JoinColumn(name = "user_id")
+private UserEntity user;
+
     public Note() {
     }
 
@@ -70,6 +75,7 @@ public class Note {    //class note became "Hey database, make a table called NO
         this.priority = priority;
     }
    
+
     public String getTitle() {
         return title;
     }
@@ -141,4 +147,12 @@ public class Note {    //class note became "Hey database, make a table called NO
     public void setTrashed(boolean trashed) {
         this.isTrashed = trashed;
     }
+
+    public UserEntity getUser() {
+    return user;
+}
+
+public void setUser(UserEntity user) {
+    this.user = user;
+}
 }
