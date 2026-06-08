@@ -44,6 +44,21 @@ class ControllerDemoTest {
         return email;
     }
 
+    private String createDbUserAndReturnEmail() throws Exception {
+        String email = "db-user-" + UUID.randomUUID() + "@example.com";
+
+        Map<String, Object> user = new HashMap<>();
+        user.put("userName", "Db User");
+        user.put("userEmail", email);
+
+        mockMvc.perform(post("/users")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(user))
+        ).andExpect(status().isOk());
+
+        return email;
+    }
+
     @Test
     void createUser_happyPath() throws Exception {
         String email = "user-" + UUID.randomUUID();
@@ -128,6 +143,69 @@ class ControllerDemoTest {
         .andExpect(jsonPath("$.body").value("New body"))
         .andExpect(jsonPath("$.priority").value(2))
         .andExpect(jsonPath("$.updatedAt").exists());
+    }
+
+    @Test
+    void day24_createUserDbFlow_happyPath() throws Exception {
+        String email = "db-create-" + UUID.randomUUID() + "@example.com";
+
+        Map<String, Object> user = new HashMap<>();
+        user.put("userName", "Day24 User");
+        user.put("userEmail", email);
+
+        mockMvc.perform(post("/users")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(user))
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.userName").value("Day24 User"))
+        .andExpect(jsonPath("$.userEmail").value(email));
+    }
+
+    @Test
+    void day24_addAndGetNotesDbFlow_happyPath() throws Exception {
+        String email = createDbUserAndReturnEmail();
+
+        Map<String, Object> note = new HashMap<>();
+        note.put("title", "DB title");
+        note.put("body", "DB body");
+        note.put("priority", 1);
+
+        mockMvc.perform(post("/users/{email}/notes", email)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(note))
+        )
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.title").value("DB title"))
+        .andExpect(jsonPath("$.priority").value(1))
+        .andExpect(jsonPath("$.createdAt").exists())
+        .andExpect(jsonPath("$.updatedAt").exists());
+
+        mockMvc.perform(get("/users/{email}/notes", email))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$[0].title").value("DB title"))
+            .andExpect(jsonPath("$[0].body").value("DB body"));
+    }
+
+    @Test
+    void day24_getNotesDbFlow_userNotFound_returns404() throws Exception {
+        mockMvc.perform(get("/users/{email}/notes", "ghost-" + UUID.randomUUID() + "@example.com"))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void day24_addNoteDbFlow_invalidPriority_returns400() throws Exception {
+        String email = createDbUserAndReturnEmail();
+
+        Map<String, Object> note = new HashMap<>();
+        note.put("title", "Bad priority");
+        note.put("body", "Body");
+        note.put("priority", 0);
+
+        mockMvc.perform(post("/users/{email}/notes", email)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(note))
+        ).andExpect(status().isBadRequest());
     }
 
     @Test
