@@ -34,6 +34,7 @@ package com.keepNotes.demo.ObjectUser;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.keepNotes.demo.entity.UserEntity;
@@ -62,7 +63,8 @@ public class Note {    //class note became "Hey database, make a table called NO
     private boolean isArchived = false;
     private boolean isTrashed = false;
 
-        @ManyToOne  //many notes can point to one user
+    @JsonIgnore
+    @ManyToOne  //many notes can point to one user
 @JoinColumn(name = "user_id")
 private UserEntity user;
 

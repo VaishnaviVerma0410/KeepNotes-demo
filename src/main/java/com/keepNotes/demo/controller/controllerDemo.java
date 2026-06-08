@@ -9,6 +9,10 @@ import org.springframework.web.server.ResponseStatusException;
 import com.keepNotes.demo.ObjectUser.Note;
 import com.keepNotes.demo.ObjectUser.ReorderNoteRequest;
 import com.keepNotes.demo.ObjectUser.User;
+import com.keepNotes.demo.dto.CreateNoteRequest;
+import com.keepNotes.demo.dto.CreateUserRequest;
+import com.keepNotes.demo.entity.UserEntity;
+import com.keepNotes.demo.service.Day24DbFlowService;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -40,6 +44,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 public class controllerDemo {
 
     private HashMap<String, User> users = new HashMap<>();
+    private final Day24DbFlowService day24DbFlowService;
+
+    public controllerDemo(Day24DbFlowService day24DbFlowService) {
+        this.day24DbFlowService = day24DbFlowService;
+    }
 
     // helper function to set ID for notes
     private void reindexNotes(User user) {
@@ -58,6 +67,22 @@ public class controllerDemo {
             }
         }
         return false;
+    }
+
+    // Day 24 DB-backed flow: create user, add note, fetch notes
+    @PostMapping
+    public UserEntity createUserDb(@RequestBody CreateUserRequest request) {
+        return day24DbFlowService.createUser(request);
+    }
+
+    @PostMapping("/{email}/notes") 
+    public Note addNoteDb(@PathVariable String email, @RequestBody CreateNoteRequest request) {
+        return day24DbFlowService.addNote(email, request);
+    }
+
+    @GetMapping("/{email}/notes")
+    public List<Note> getNotesDb(@PathVariable String email) {
+        return day24DbFlowService.getNotes(email);
     }
 
     // Adding a user
